@@ -37,11 +37,25 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 vim.keymap.set('n', ',', '<cmd>bprev<CR>')
 vim.keymap.set('n', '.', '<cmd>bnext<CR>')
 
+--Move block of selected line/lines
+vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv")
+vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv")
+
+-- Open this file with keybinding
+vim.keymap.set('n', '<leader>_', '<cmd>edit ~/.config/nvim/init.lua')
 -- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
 -- or just use <C-\><C-n> to exit terminal mode
-vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 -- Handrolled Terminal below
-vim.keymap.set('n', '<leader>`', '<cmd>au TermOpen * setlocal nonumber norelativenumber signcolumn=no<CR><cmd>sp | winc J | res 15 | te<CR>')
+--vim.keymap.set('n', '<leader>`', '<cmd>au TermOpen * setlocal nonumber norelativenumber signcolumn=no<CR><cmd>sp | winc J | res 15 | te<CR>')
+-- ToggleTerm
+vim.keymap.set('n', '<leader>`', '<cmd>ToggleTerm display="terminal"<CR>')
+vim.keymap.set('t', '<leader>`', '<cmd>ToggleTerm<CR>')
+vim.keymap.set('t', '<C-h>', '<cmd>wincmd h<CR>')
+vim.keymap.set('t', '<C-j>', '<cmd>wincmd j<CR>')
+vim.keymap.set('t', '<C-k>', '<cmd>wincmd k<CR>')
+vim.keymap.set('t', '<C-l>', '<cmd>wincmd l<CR>')
+vim.keymap.set('t', '<C-w>', '<C-\\><C-n><C-w>')
 
 --  See `:help wincmd` for a list of all window commands
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
@@ -76,6 +90,8 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  -- ToggleTerm
+  { 'akinsho/toggleterm.nvim', version = '*', config = true },
 
   'mbbill/undotree',
   { 'numToStr/Comment.nvim', opts = {} },
@@ -378,7 +394,37 @@ require('lazy').setup({
     config = function()
       -- See `:help cmp`
       local cmp = require 'cmp'
+
+      -- Adding custom snippets for Go
       local luasnip = require 'luasnip'
+      local lsnip = luasnip.snippet
+      local tnode = luasnip.text_node
+      local session = luasnip.session
+      local env = session.config.snip_env
+      local s = env['s']
+      local t = env['t']
+      local i = env['i']
+      local parse = env['parse']
+      --local inode = luasnip.insert_node
+
+      luasnip.add_snippets('go', {
+        --[[         lsnip('got', {
+          tnode { 'package main', 'import "fmt"', 'func main() {', 'fmt.Println("Hello World!")', '}' },
+        }), ]]
+        parse(
+          { trig = 'got', name = 'Main Package', dscr = 'Basic main package structure' },
+          [[
+          package main
+
+          import "fmt"
+
+          func main() {
+            fmt.Println("Hello World")
+          }
+        ]]
+        ),
+        lsnip('ert', { tnode { 'if err!=nil {', 'return err', '}' } }),
+      })
       luasnip.config.setup {}
 
       cmp.setup {
