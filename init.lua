@@ -423,7 +423,15 @@ require('lazy').setup({
           }
         ]]
         ),
-        lsnip('ert', { tnode { 'if err!=nil {', 'return err', '}' } }),
+        -- lsnip('ert', { tnode { 'if err!=nil {', 'return err', '}' } }),
+        parse(
+          { trig = 'err', name = 'Error Snippet', dscr = 'Simple Error Snippet' },
+          [[
+          if err != nil {
+            return err
+          }
+          ]]
+        ),
       })
       luasnip.config.setup {}
 
