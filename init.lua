@@ -53,7 +53,7 @@ vim.keymap.set('n', '<leader>`', '<cmd>ToggleTerm display="terminal"<CR>')
 vim.keymap.set('t', '<leader>`', '<cmd>ToggleTerm<CR>')
 vim.keymap.set('t', '<C-h>', '<cmd>wincmd h<CR>')
 vim.keymap.set('t', '<C-j>', '<cmd>wincmd j<CR>')
-vim.keymap.set('t', '<C-k>', '<cmd>wincmd k<CR>')
+-- vim.keymap.set('t', '<C-k>', '<cmd>wincmd k<CR>')
 vim.keymap.set('t', '<C-l>', '<cmd>wincmd l<CR>')
 vim.keymap.set('t', '<C-w>', '<C-\\><C-n><C-w>')
 
@@ -61,7 +61,7 @@ vim.keymap.set('t', '<C-w>', '<C-\\><C-n><C-w>')
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+-- vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- undotree
 vim.keymap.set('n', '<leader>u', vim.cmd.UndotreeToggle, { desc = 'Toggle [U}ndotree' })
@@ -92,10 +92,15 @@ require('lazy').setup({
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
   -- ToggleTerm
   { 'akinsho/toggleterm.nvim', version = '*', config = true },
-
   'mbbill/undotree',
   { 'numToStr/Comment.nvim', opts = {} },
-
+  {
+    'windwp/nvim-autopairs',
+    event = 'InsertEnter',
+    config = true,
+    -- use opts = {} for passing setup options
+    -- this is equalent to setup({}) function
+  },
   {
     'lewis6991/gitsigns.nvim',
     opts = {
@@ -109,7 +114,6 @@ require('lazy').setup({
       auto_attach = true,
     },
   },
-
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
   { -- Useful plugin to show you pending keybinds.
@@ -322,9 +326,13 @@ require('lazy').setup({
               completion = {
                 callSnippet = 'Replace',
               },
+              diagnostics = {
+                globals = { 'vim' },
+              },
             },
           },
         },
+        require('lspconfig').gopls.setup { capabilities = capabilities },
       }
 
       require('mason').setup()
@@ -344,6 +352,23 @@ require('lazy').setup({
           end,
         },
       }
+    end,
+  },
+  {
+    'ray-x/lsp_signature.nvim',
+    event = 'VeryLazy',
+    opts = {},
+    config = function(_)
+      require('lsp_signature').setup {
+        bind = true, -- This is mandatory, otherwise border config won't get registered.
+        handler_opts = {
+          border = 'rounded',
+        },
+      }
+      vim.keymap.set({ 'n' }, '<C-k>', function()
+        -- require('lsp_signature').toggle_float_win()
+        vim.lsp.buf.signature_help()
+      end, { silent = true, noremap = true, desc = 'toggle signature' })
     end,
   },
 
@@ -400,20 +425,11 @@ require('lazy').setup({
 
       -- Adding custom snippets for Go
       local luasnip = require 'luasnip'
-      local lsnip = luasnip.snippet
-      local tnode = luasnip.text_node
       local session = luasnip.session
       local env = session.config.snip_env
-      local s = env['s']
-      local t = env['t']
-      local i = env['i']
       local parse = env['parse']
-      --local inode = luasnip.insert_node
 
       luasnip.add_snippets('go', {
-        --[[         lsnip('got', {
-          tnode { 'package main', 'import "fmt"', 'func main() {', 'fmt.Println("Hello World!")', '}' },
-        }), ]]
         parse(
           { trig = 'got', name = 'Main Package', dscr = 'Basic main package structure' },
           [[
@@ -426,7 +442,6 @@ require('lazy').setup({
           }
         ]]
         ),
-        -- lsnip('ert', { tnode { 'if err!=nil {', 'return err', '}' } }),
         parse(
           { trig = 'err', name = 'Error Snippet', dscr = 'Simple Error Snippet' },
           [[
