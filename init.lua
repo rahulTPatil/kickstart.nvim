@@ -98,6 +98,12 @@ require('lazy').setup({
   'mbbill/undotree',
   { 'numToStr/Comment.nvim', opts = {} },
   {
+    'karb94/neoscroll.nvim',
+    config = function()
+      require('neoscroll').setup { stop_eof = true, respect_scrolloff = false, easing = 'linear' }
+    end,
+  },
+  {
     'windwp/nvim-autopairs',
     event = 'InsertEnter',
     config = true,
