@@ -50,6 +50,8 @@ vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 --vim.keymap.set('n', '<leader>`', '<cmd>au TermOpen * setlocal nonumber norelativenumber signcolumn=no<CR><cmd>sp | winc J | res 15 | te<CR>')
 -- ToggleTerm
 vim.keymap.set('n', '<leader>`', '<cmd>ToggleTerm display="terminal"<CR>')
+-- Add command to execute go test
+vim.keymap.set('n', '<leader>g', '<cmd>!go test<CR>', { desc = 'Run go test' })
 vim.keymap.set('t', '<leader>`', '<cmd>ToggleTerm<CR>')
 vim.keymap.set('t', '<C-h>', '<cmd>wincmd h<CR>')
 vim.keymap.set('t', '<C-j>', '<cmd>wincmd j<CR>')
@@ -90,6 +92,7 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  'tpope/vim-fugitive',
   -- ToggleTerm
   { 'akinsho/toggleterm.nvim', version = '*', config = true },
   'mbbill/undotree',
@@ -332,7 +335,6 @@ require('lazy').setup({
             },
           },
         },
-        require('lspconfig').gopls.setup { capabilities = capabilities },
       }
 
       require('mason').setup()
@@ -366,8 +368,8 @@ require('lazy').setup({
         },
       }
       vim.keymap.set({ 'n' }, '<C-k>', function()
-        -- require('lsp_signature').toggle_float_win()
-        vim.lsp.buf.signature_help()
+        require('lsp_signature').toggle_float_win()
+        -- vim.lsp.buf.signature_help()
       end, { silent = true, noremap = true, desc = 'toggle signature' })
     end,
   },
